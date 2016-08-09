@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <declare-styleable name="MyWatch">
+        <attr name="speed" format="integer" />
+    </declare-styleable>
+
+
+    <declare-styleable name="MySmallWatch">
+        <attr name="val" format="integer" />
+        <attr name="total" format="integer" />
+        <attr name="name" format="string" />
+        <attr name="unit" format="string" />
+        <attr name="circle_color" format="color" />
+        <attr name="radius" format="dimension" />
+    </declare-styleable>
+
+</resources>
