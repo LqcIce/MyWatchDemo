@@ -3,4 +3,4 @@
 
 http://blog.csdn.net/lqc1992/article/details/52161920
 
-![图片](http://img.blog.csdn.net/20160809133406960)
+![](https://github.com/LqcIce/MyWatchDemo/blob/21eaf42e25a02dfad83c04cfd25c4a5a26f19219/app/src/main/res/drawable-xxhdpi/e.gif?raw=true)
