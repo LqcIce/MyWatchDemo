@@ -66,6 +66,31 @@ public class MyWatch extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
+
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int width;
+        int height;
+
+        if (widthMode == MeasureSpec.EXACTLY) {
+            width = widthSize;
+        } else {
+            float needWidth = back.getWidth();
+            int desired = (int) (getPaddingLeft() + needWidth + getPaddingRight());
+            width = desired;
+        }
+
+        if (heightMode == MeasureSpec.EXACTLY) {
+            height = heightSize;
+        } else {
+            float needWidth = back.getHeight();
+            int desired = (int) (getPaddingTop() + needWidth + getPaddingBottom());
+            height = desired;
+        }
+        setMeasuredDimension(width, height);
     }
 
     @Override
@@ -78,7 +103,7 @@ public class MyWatch extends View {
 
 
         //绘制指针
-        float arc = (speed%240 - 120) * 180 / 240;
+        float arc = (speed % 240 - 120) * 180 / 240;
         Matrix matrix = new Matrix();
         matrix.postRotate(arc);
 
@@ -86,10 +111,10 @@ public class MyWatch extends View {
         Bitmap dstbmp = Bitmap.createBitmap(arrow, 0, 0, arrow.getWidth(),
                 arrow.getHeight(), matrix, true);
 
-        if (arc>=0)
-            canvas.drawBitmap(dstbmp, backWidth / 2 - arrow.getWidth() / 2 + (int) (arrow.getWidth() * Math.sin(arc * Math.PI / 180)), (int) (backHeight - center.getWidth() / 2 -arrow.getWidth()/4- arrow.getHeight() * Math.cos(arc * Math.PI / 180)), null);
+        if (arc >= 0)
+            canvas.drawBitmap(dstbmp, backWidth / 2 - arrow.getWidth() / 2 + (int) (arrow.getWidth() * Math.sin(arc * Math.PI / 180)), (int) (backHeight - center.getWidth() / 2 - arrow.getWidth() / 4 - arrow.getHeight() * Math.cos(arc * Math.PI / 180)), null);
         else {
-            canvas.drawBitmap(dstbmp, backWidth / 2 - arrow.getWidth() / 2 + (int) (arrow.getHeight() * Math.sin(arc * Math.PI / 180)), (int) (backHeight - center.getWidth() / 2 -arrow.getWidth()/4- arrow.getHeight() * Math.cos(arc * Math.PI / 180)), null);
+            canvas.drawBitmap(dstbmp, backWidth / 2 - arrow.getWidth() / 2 + (int) (arrow.getHeight() * Math.sin(arc * Math.PI / 180)), (int) (backHeight - center.getWidth() / 2 - arrow.getWidth() / 4 - arrow.getHeight() * Math.cos(arc * Math.PI / 180)), null);
 
         }
 
@@ -98,10 +123,8 @@ public class MyWatch extends View {
         // 计算左边位置
         left = backWidth / 2 - center.getWidth() / 2;
         // 计算上边位置
-        top = backHeight - center.getHeight() ;
+        top = backHeight - center.getHeight();
         canvas.drawBitmap(center, left, top, paint);
-
-
 
 
         //中心数字
@@ -112,7 +135,7 @@ public class MyWatch extends View {
         paint.setAntiAlias(true);
 
         paint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText(speed%240+"",backWidth / 2,backHeight*2 / 3,paint);
+        canvas.drawText(speed % 240 + "", backWidth / 2, backHeight * 2 / 3, paint);
 
 
     }

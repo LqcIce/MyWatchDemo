@@ -63,8 +63,34 @@ public class MySmallWatch extends ImageView {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        mWidth = getMeasuredWidth();
-        mHeight = getMeasuredHeight();
+
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+
+        if (widthMode == MeasureSpec.EXACTLY) {
+            mWidth = widthSize;
+        } else {
+
+            float needWidth = radius * 2 + 24;
+            int desired = (int) (getPaddingLeft() + needWidth + getPaddingRight());
+            mWidth = desired;
+        }
+
+        if (heightMode == MeasureSpec.EXACTLY) {
+            mHeight = heightSize;
+        } else {
+            paint.setStrokeWidth(6);
+
+            float needWidth = radius * 2 + 24;
+            int desired = (int) (getPaddingTop() + needWidth + getPaddingBottom());
+            mHeight = desired;
+        }
+
+
+        setMeasuredDimension(mWidth, mHeight);
 
     }
 
