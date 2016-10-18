@@ -4,21 +4,13 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Shader;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
-import android.widget.ImageView;
 
 /**
  * Created by ice on 2016/8/1.
@@ -26,9 +18,14 @@ import android.widget.ImageView;
 public class MyWatch extends View {
 
     private Paint paint;
+    private Paint textPaint;
+
+    private int mWidth;
+    private int mHeight;
 
     int speed = 0;
-    private Bitmap back;
+    float radius;
+    //    private Bitmap back;
     private Bitmap center;
     private Bitmap arrow;
     private int left;
@@ -52,11 +49,12 @@ public class MyWatch extends View {
         speed = a.getInt(R.styleable.MyWatch_speed, 0);
 
         paint = new Paint();
+        textPaint = new Paint();
 
-        back = BitmapFactory.decodeResource(getResources(), R.drawable.back_watch);
+        radius = a.getDimension(R.styleable.MyWatch_radius, 200);
+
         center = BitmapFactory.decodeResource(getResources(), R.drawable.icon_watch_center);
         arrow = BitmapFactory.decodeResource(getResources(), R.drawable.icon_watch_arrow);
-
 
         a.recycle();
 
@@ -66,77 +64,101 @@ public class MyWatch extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        int width;
-        int height;
-
         if (widthMode == MeasureSpec.EXACTLY) {
-            width = widthSize;
+            mWidth = widthSize;
         } else {
-            float needWidth = back.getWidth();
+            float needWidth = radius * 2+8;
             int desired = (int) (getPaddingLeft() + needWidth + getPaddingRight());
-            width = desired;
+            mWidth = desired;
         }
 
         if (heightMode == MeasureSpec.EXACTLY) {
-            height = heightSize;
+            mHeight = heightSize;
         } else {
-            float needWidth = back.getHeight();
+            float needWidth = radius+24;
             int desired = (int) (getPaddingTop() + needWidth + getPaddingBottom());
-            height = desired;
+            mHeight = desired;
         }
-        setMeasuredDimension(width, height);
+
+        setMeasuredDimension(mWidth, mHeight);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
 
-        int backWidth = back.getWidth();
-        int backHeight = back.getHeight();
-        //绘制表盘
-        canvas.drawBitmap(back, 0, 0, paint);
-
-
-        //绘制指针
-        float arc = (speed % 240 - 120) * 180 / 240;
-        Matrix matrix = new Matrix();
-        matrix.postRotate(arc);
-
-
-        Bitmap dstbmp = Bitmap.createBitmap(arrow, 0, 0, arrow.getWidth(),
-                arrow.getHeight(), matrix, true);
-
-        if (arc >= 0)
-            canvas.drawBitmap(dstbmp, backWidth / 2 - arrow.getWidth() / 2 + (int) (arrow.getWidth() * Math.sin(arc * Math.PI / 180)), (int) (backHeight - center.getWidth() / 2 - arrow.getWidth() / 4 - arrow.getHeight() * Math.cos(arc * Math.PI / 180)), null);
-        else {
-            canvas.drawBitmap(dstbmp, backWidth / 2 - arrow.getWidth() / 2 + (int) (arrow.getHeight() * Math.sin(arc * Math.PI / 180)), (int) (backHeight - center.getWidth() / 2 - arrow.getWidth() / 4 - arrow.getHeight() * Math.cos(arc * Math.PI / 180)), null);
-
-        }
-
-
-        //绘制圆心
-        // 计算左边位置
-        left = backWidth / 2 - center.getWidth() / 2;
-        // 计算上边位置
-        top = backHeight - center.getHeight();
-        canvas.drawBitmap(center, left, top, paint);
-
-
-        //中心数字
-        paint.setStrokeWidth(4);
-        paint.setColor(Color.WHITE);
-        paint.setTextSize(100);
+        paint.setStrokeWidth(6);
+        paint.setColor(getResources().getColor(R.color.watchBlue));
+        paint.setStyle(Paint.Style.STROKE);
         //抗锯齿
         paint.setAntiAlias(true);
 
-        paint.setTextAlign(Paint.Align.CENTER);
-        canvas.drawText(speed % 240 + "", backWidth / 2, backHeight * 2 / 3, paint);
+        //绘制表盘
+        RectF oval1 = new RectF(4, 4, radius * 2, radius * 2);// 设置个新的长方形，扫描测量
+        canvas.drawArc(oval1, -180, 180, false, paint);
 
+        //绘制指针
+        paint.setColor(Color.WHITE);
+        float arc = (float) (speed % 140) * 180 / 140;
+
+        canvas.save(); //记录画布状态
+        canvas.rotate(-90+arc, mWidth / 2, radius);
+        canvas.drawLine(mWidth / 2, 20, mWidth / 2, radius, paint);//画指针
+        canvas.restore();
+
+        //绘制圆心
+        // 计算左边位置
+        left = mWidth / 2 - center.getWidth() / 2;
+        // 计算上边位置
+        top = mHeight - center.getHeight();
+        canvas.drawBitmap(center, left, top, paint);
+
+        //按照百分比绘制刻度
+        //绘制小刻度
+        canvas.save(); //记录画布状态
+        canvas.rotate(-90, mWidth / 2, radius);
+        float rAngle1 = (float) 180.0 / 70;
+        canvas.drawLine(mWidth / 2, 3, mWidth / 2, 40, paint);//画刻度线
+
+        for (int i = 0; i < 70; i++) {
+            canvas.rotate(rAngle1, mWidth / 2, radius);
+            canvas.drawLine(mWidth / 2, 10, mWidth / 2, 30, paint);//画刻度线
+            //            canvas.drawText("" + i * 10, getWidth() / 2 - mArcWidth * 2, 40, paintouter_Num);//画刻度
+
+        }
+        canvas.restore();
+
+        //绘制大刻度和度数
+        paint.setColor(getResources().getColor(R.color.watchBlue));
+
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(30);
+        textPaint.setTextAlign(Paint.Align.CENTER);
+        //抗锯齿
+        textPaint.setAntiAlias(true);
+
+        canvas.save(); //记录画布状态
+        canvas.rotate(-90, mWidth / 2, radius);
+        float rAngle = (float) 180 / 14;
+        canvas.drawLine(mWidth / 2, 3, mWidth / 2, 40, paint);//画刻度线
+        canvas.drawText("" + 0, mWidth / 2, 75, textPaint);//画刻度
+        for (int i = 0; i < 14; i++) {
+            canvas.rotate(rAngle, mWidth / 2, radius);
+            canvas.drawLine(mWidth / 2, 4, mWidth / 2, 40, paint);//画刻度线
+            canvas.drawText("" + (i+1)* 10, mWidth / 2, 75, textPaint);//画刻度
+
+        }
+        canvas.restore();
+
+        //中心数字
+        textPaint.setStrokeWidth(4);
+        textPaint.setTextSize(90);
+
+        canvas.drawText(speed % 140 + "", mWidth / 2, mHeight * 2 / 3, textPaint);
 
     }
 
